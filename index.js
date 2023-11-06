@@ -4,6 +4,7 @@ const directions = {
   DOWN_ENTER: "down_enter",
   DOWN_LEAVE: "down_leave",
 };
+
 const rootEl = document.querySelector("#root-area");
 const observedEl = document.querySelector("#animated-el");
 
@@ -41,7 +42,12 @@ const entryDirection = (entry, state) => {
 const callback = (entryArray) => {
   const entry = entryArray[0];
   if (entryDirection(entry, intersectionState) === directions.UP_ENTER) {
-    console.log("Entrei");
+    const styles = observedEl.getAttribute("data-animation");
+    for (let style of styles?.split(";")) {
+      const [key, val] = style.split(":");
+      observedEl.style[key.trim()] = val.trim();
+      console.log(style);
+    }
   }
 };
 
