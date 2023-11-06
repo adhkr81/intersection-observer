@@ -4,13 +4,20 @@
 }
 
 .spacing {
-  border: 2px solid purple;
   height: 130vh;
 }
 
-.animated {
-  border: 2px solid green;
-  height: 100px;
-  background-color: gray;
-  transition: 3s;
+.content {
+  border-radius: 4px;
+  border: 2px solid #7d7d7d;
+  height: 300px;
+  transition: 2s;
+}
+
+[data-animated="true"][data-animation="fade-in"] {
+  background-color: #7d7d7d;
+}
+
+[data-animated="false"][data-animation="fade-in"] {
+  background-color: white;
 }

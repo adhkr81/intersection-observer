@@ -26,17 +26,12 @@ const setDataAnimated = (el, val) => {
   el.setAttribute("data-animated", val);
 };
 
-const applyDataAnimation = (el) => {
-  // Retrieve styles from data attribute
-  const styles = el.getAttribute("data-animation");
-  if (typeof styles !== "string" || styles === "") return;
-
-  // Inject styles into element
-  styles.split(";").forEach((style) => {
-    const [key, val] = style.split(":");
-    if (key && val) el.style[key?.trim()] = val?.trim();
-  });
-};
+// const applyDataAnimation = (el) => {
+//   // Retrieve styles from data attribute
+//   const styles = el.getAttribute("data-animation");
+//   if (typeof styles !== "string" || styles === "") return;
+//   el.classList.add(styles);
+// };
 
 const entryDirection = (entry, state) => {
   /** Function uses previous rect data to derive direction and if entering or leaving */
@@ -69,9 +64,7 @@ const initIntersectionObserver = () => {
     // Clause checks if element is already above current view
     const r = el.getBoundingClientRect();
     if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
-      applyDataAnimation(el);
-      setDataAnimated(el, "true");
-      return;
+      setDataAnimated(el, true);
     }
 
     // Form closure over object to hold previous state data
@@ -81,9 +74,11 @@ const initIntersectionObserver = () => {
     };
 
     const fn = (entries) => {
-      if (entryDirection(entries[0], prev) !== directions.UP_ENTER) return;
-      applyDataAnimation(el);
-      setDataAnimated(el, "true");
+      const dir = entryDirection(entries[0], prev);
+      const isEntering =
+        dir === directions.UP_ENTER || dir === directions.DOWN_ENTER;
+      // Sets data-animated attribute to true if element is entering and false if exiting
+      setDataAnimated(el, isEntering);
     };
 
     // Create intersection observer
@@ -99,8 +94,7 @@ const initIntersectionObserverFallback = () => {
       // Clause checks if element is already above current view
       const r = el.getBoundingClientRect();
       if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
-        applyDataAnimation(el);
-        setDataAnimated(el, "true");
+        setDataAnimated(el, true);
         return;
       }
       // Check element if on-screen
@@ -110,16 +104,8 @@ const initIntersectionObserverFallback = () => {
         r.bottom <= window.innerHeight &&
         r.right <= window.innerWidth
       ) {
-        // Retrieve styles from data attribute
-        const styles = el.getAttribute("data-animation");
-        if (typeof styles !== "string") return;
-        // Inject styles into element
-        styles.split(";").forEach((style) => {
-          const [key, val] = style.split(":");
-          if (key && val) el.style[key?.trim()] = val?.trim();
-        });
         // Change data animated to true
-        el.setAttribute("data-animated", "true");
+        setDataAnimated(el, true);
       }
     });
   });
