@@ -13,9 +13,9 @@
 const animationConfig = {
   "multiple-staggered-fadein": {
     child_class: "animated-child",
-    parent_styles: "background-color:gray;padding:35px;",
+    parent_styles: "backgroundColor:#7d7d7d;padding:50px;",
+    child_styles: "opacity:1;",
     stagger: 300,
-    opacity: 1,
   },
 };
 
@@ -31,10 +31,14 @@ const directions = {
 const INTERSECTION_OBSERVER_SUPPORT = "IntersectionObserver" in window;
 
 const applyStyles = (el, styles) => {
-  styles.split(";").forEach((style) => {
-    const [k, v] = style.split(":");
-    el.style[k?.trim()] = v?.trim();
-  });
+  styles
+    .trim()
+    .split(";")
+    .forEach((style) => {
+      if (style === "") return;
+      const [k, v] = style.split(":");
+      el.style[k?.trim()] = v?.trim();
+    });
 };
 
 const setDataAnimated = (el, val) => {
@@ -52,12 +56,12 @@ const applyDataAnimation = (el) => {
   if (config.parent_styles) applyStyles(el, config.parent_styles);
 
   el.querySelectorAll(`.${config.child_class}`).forEach((node, idx) => {
-    if (Object.hasOwn(config, "stagger")) {
+    if (config?.stagger) {
       node.style.transitionDelay = `${idx * config.stagger}ms`;
     }
 
-    if (Object.hasOwn(config, "opacity")) {
-      node.style.opacity = config.opacity;
+    if (config?.child_styles) {
+      applyStyles(node, config.child_styles);
     }
   });
 };
