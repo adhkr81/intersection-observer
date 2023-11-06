@@ -1,0 +1,15 @@
+* {
+  padding: none;
+  margin: none;
+}
+
+.spacing {
+  border: 2px solid purple;
+  height: 130vh;
+}
+
+.animated {
+  border: 2px solid green;
+  height: 100px;
+  background-color: gray;
+}
