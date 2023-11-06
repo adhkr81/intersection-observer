@@ -1,3 +1,4 @@
+
 /** Direction constants */
 const directions = {
   UP_ENTER: "up_enter",
@@ -6,7 +7,20 @@ const directions = {
   DOWN_LEAVE: "down_leave",
 };
 
-const INTERSECTION_OBSERVER_SUPPORT = "IntersectionObserver" in window;
+/** Scroll area and animated elements */
+const rootEl = document.querySelector("#root-area");
+const observedEl = document.querySelector("#animated-el");
+
+const options = {
+  root: rootEl,
+  rootMargin: "0px",
+  threshold: 0,
+};
+
+const intersectionState = {
+  prevY: 0,
+  prevRatio: 0,
+};
 
 const entryDirection = (entry, state) => {
   /** Function uses previous rect data to derive direction and if entering or leaving */
@@ -34,35 +48,17 @@ const entryDirection = (entry, state) => {
   }
 };
 
-const animatedElements = document.querySelectorAll('[data-animated="false"]');
-animatedElements.forEach((element) => {
-  // Form closure over object to hold previous state data
-  const intersectionState = {
-    prevY: 0,
-    prevRatio: 0,
-  };
-
-  const fn = (entries) => {
-    const entry = entries[0];
-    // Ensure entry direction is on scroll down
-    if (entryDirection(entry, intersectionState) !== directions.UP_ENTER) {
-      return;
-    }
-
-    // Retrieve styles from data attribute
-    const styles = element.getAttribute("data-animation");
-    if (typeof styles !== "string") return;
-
-    // Inject styles into element
-    styles.split(";").forEach((style) => {
+const callback = (entryArray) => {
+  const entry = entryArray[0];
+  if (entryDirection(entry, intersectionState) === directions.UP_ENTER) {
+    const styles = observedEl.getAttribute("data-animation");
+    for (let style of styles?.split(";")) {
       const [key, val] = style.split(":");
-      if (key && val) element.style[key?.trim()] = val?.trim();
-    });
+      observedEl.style[key.trim()] = val.trim();
+      console.log(style);
+    }
+  }
+};
 
-    // Change data animated to true
-    element.setAttribute("data-animated", "true");
-  };
-
-  // Create intersection observer
-  new IntersectionObserver(fn, { threshold: 0 }).observe(element);
-});
+const observer = new IntersectionObserver(callback, options);
+observer.observe(observedEl);
