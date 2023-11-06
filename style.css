@@ -9,9 +9,14 @@
 
 .content {
   border-radius: 4px;
-  border: 2px solid #7d7d7d;
   height: 300px;
+  padding: 30px;
+
   transition: 2s;
+
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
 }
 
 [data-animated="true"][data-animation="fade-in"] {
@@ -20,4 +25,12 @@
 
 [data-animated="false"][data-animation="fade-in"] {
   background-color: white;
+}
+
+.animated-child {
+  background-color: white;
+  border-radius: 4px;
+  width: 100%;
+  opacity: 0;
+  transition: 2s;
 }

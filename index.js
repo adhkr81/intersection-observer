@@ -10,6 +10,15 @@
  * Elements above viewport on entering page have their animations triggered by default.
  */
 
+const animationConfig = {
+  "multiple-staggered-fadein": {
+    child_class: "animated-child",
+    parent_styles: "background-color:gray;padding:35px;",
+    stagger: 300,
+    opacity: 1,
+  },
+};
+
 // Movement direction constants
 const directions = {
   UP_ENTER: "up_enter",
@@ -21,17 +30,37 @@ const directions = {
 // Browser supports Intersection Observer
 const INTERSECTION_OBSERVER_SUPPORT = "IntersectionObserver" in window;
 
+const applyStyles = (el, styles) => {
+  styles.split(";").forEach((style) => {
+    const [k, v] = style.split(":");
+    el.style[k?.trim()] = v?.trim();
+  });
+};
+
 const setDataAnimated = (el, val) => {
   // Sets data-animated attribute
   el.setAttribute("data-animated", val);
 };
 
-// const applyDataAnimation = (el) => {
-//   // Retrieve styles from data attribute
-//   const styles = el.getAttribute("data-animation");
-//   if (typeof styles !== "string" || styles === "") return;
-//   el.classList.add(styles);
-// };
+const applyDataAnimation = (el) => {
+  // Retrieve config with data attribute
+  const attr = el.getAttribute("data-animation");
+
+  const config = animationConfig[attr];
+  if (!config) return;
+
+  if (config.parent_styles) applyStyles(el, config.parent_styles);
+
+  el.querySelectorAll(`.${config.child_class}`).forEach((node, idx) => {
+    if (Object.hasOwn(config, "stagger")) {
+      node.style.transitionDelay = `${idx * config.stagger}ms`;
+    }
+
+    if (Object.hasOwn(config, "opacity")) {
+      node.style.opacity = config.opacity;
+    }
+  });
+};
 
 const entryDirection = (entry, state) => {
   /** Function uses previous rect data to derive direction and if entering or leaving */
@@ -64,6 +93,7 @@ const initIntersectionObserver = () => {
     // Clause checks if element is already above current view
     const r = el.getBoundingClientRect();
     if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
+      applyDataAnimation(el);
       setDataAnimated(el, true);
     }
 
@@ -75,10 +105,14 @@ const initIntersectionObserver = () => {
 
     const fn = (entries) => {
       const dir = entryDirection(entries[0], prev);
-      const isEntering =
-        dir === directions.UP_ENTER || dir === directions.DOWN_ENTER;
+
       // Sets data-animated attribute to true if element is entering and false if exiting
-      setDataAnimated(el, isEntering);
+      if (dir === directions.UP_ENTER || dir === directions.DOWN_ENTER) {
+        applyDataAnimation(el);
+        setDataAnimated(el, true);
+      } else {
+        setDataAnimated(el, false);
+      }
     };
 
     // Create intersection observer
