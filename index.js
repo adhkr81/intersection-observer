@@ -1,3 +1,4 @@
+/** Direction constants */
 const directions = {
   UP_ENTER: "up_enter",
   UP_LEAVE: "up_leave",
@@ -5,6 +6,7 @@ const directions = {
   DOWN_LEAVE: "down_leave",
 };
 
+/** Scroll area and animated elements */
 const rootEl = document.querySelector("#root-area");
 const observedEl = document.querySelector("#animated-el");
 
@@ -20,17 +22,23 @@ const intersectionState = {
 };
 
 const entryDirection = (entry, state) => {
+  /** Function uses previous rect data to derive direction and if entering or leaving */
   const currY = entry.boundingClientRect.y;
   const currRatio = entry.intersectionRatio;
   const isIntersecting = entry.isIntersecting;
 
+  /** Current Y < Previous Y indicates downwards motion of observed el */
   if (currY < state.prevY) {
+    /** Current Ratio > Previous Ratio indicates element is entering viewport*/
+    /** Is intersecting indicates element is on screen and therefore not leaving */
     if (currRatio > state.prevRatio && isIntersecting) {
       return directions.DOWN_ENTER;
     } else {
       return directions.DOWN_LEAVE;
     }
+    /** Current Y > Previous Y indicates upwards motion of observed el */
   } else if (currY > state.prevY && isIntersecting) {
+    /** Current Ratio < Previous Ratio indicates element is leaving viewport*/
     if (currRatio < state.prevRatio) {
       return directions.UP_LEAVE;
     } else {
