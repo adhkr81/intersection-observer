@@ -4,67 +4,29 @@
  * API Currently enjoys support on all major browsers expect for IE:
  * https://www.lambdatest.com/web-technologies/intersectionobserver
  *
- * This project provides an API for setting before and after styles on both
- * parent and child classes recognized by the data-animated attribute.
- *
- * In order to use it, set the data-animated attribute to true and the
- * data-animation attribute to the key of your config object. In the
- * config object, specify if there are child classes to be animated
- * with the childClass key, and the styles that will be applied in the
- * parentStyles and childStyles keys, both containing a before and after.
- * 
+ * Main observer api initializer ensures elements only animate on entering the screen from below,
+ * injects styles derived from data-animation attribute and sets data-animated to false to avoid
+ * re-animations. Fallback functionality  does not discriminate on scroll direction.
+ * Elements above viewport on entering page have their animations triggered by default.
  */
 
 const animationConfig = {
   "multiple-staggered-fadein": {
-    child_class: "animated-child",
+    child_class: "hidden-animated",
+    parent_styles: "backgroundColor:#7d7d7d;padding:50px;",
+    child_styles: `
+      opacity:1;
+    `,
     stagger: 100,
-    parentStyles: {
-      before: `
-        boxSizing:border-box;
-        padding: 35px;
-        transition: 2s;
-      `,
-      after: `
-        backgroundColor:#7d7d7d;
-        padding:50px;
-      `,
-    },
-    childStyles: {
-      before: `
-        opacity: 0;
-        transition: 2s;
-      `,
-      after: `
-        opacity: 1;
-      `,
-    },
   },
   "multiple-staggered-pop": {
-    child_class: "animated-child",
+    child_class: "pop-animated",
+    parent_styles: "backgroundColor:#7d7d7d;padding:50px;",
+    child_styles: `
+      backgroundColor:#606c38;
+      boxShadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+    `,
     stagger: 500,
-    parentStyles: {
-      before: `
-        boxSizing:border-box;
-        padding:50px;
-        transition:2s;
-      `,
-      after: `
-        backgroundColor:#7d7d7d;
-        padding:35px;
-      `,
-    },
-    childStyles: {
-      before: `
-        backgroundColor: black;
-        boxShadow: none;
-        transition: 2s;
-      `,
-      after: `
-        backgroundColor:#606c38;
-        boxShadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-      `,
-    },
   },
 };
 
@@ -81,34 +43,70 @@ const INTERSECTION_OBSERVER_SUPPORT = "IntersectionObserver" in window;
 
 const applyStyles = (el, styles) => {
   // Based on styles string, applies parsed styles to element.
-  styles.split(";").forEach((style) => {
-    if (style === "") return;
-    const [k, v] = style.split(":");
-    el.style[k?.trim()] = v?.trim();
-  });
+  styles
+    .trim()
+    .split(";")
+    .forEach((style) => {
+      if (style === "") return;
+      const [k, v] = style.split(":");
+      el.style[k?.trim()] = v?.trim();
+    });
 };
 
-const applyDataAnimation = (el, key) => {
-  // Find the data-animation attribute key to match with config object.
+const removeStyles = (el, styles) => {
+  // Based on styles string, removes parsed styles to element.
+  styles
+    .trim()
+    .split(";")
+    .forEach((style) => {
+      if (style === "") return;
+      const [k, _] = style.split(":");
+      el.style[k?.trim()] = "";
+    });
+};
+
+const setDataAnimated = (el, val) => {
+  // Sets data-animated attribute
+  el.setAttribute("data-animated", val);
+};
+
+const removeDataAnimation = (el) => {
+  // Funtion is analogous to applyData animation but removes styles.
   const attr = el.getAttribute("data-animation");
   const config = animationConfig[attr];
   if (!config) return;
+  if (config.parent_styles) removeStyles(el, config.parent_styles);
+  el.querySelectorAll(`.${config.child_class}`).forEach((node, _) => {
+    if (config?.stagger) {
+      node.style.transitionDelay = "";
+    }
+    if (config?.child_styles) {
+      removeStyles(node, config.child_styles);
+    }
+  });
+};
 
-  // If parent styles are specified, apply them.
-  if (Object.hasOwn(config?.parentStyles, key)) {
-    applyStyles(el, config.parentStyles[key]);
-  }
+const applyDataAnimation = (el) => {
+  // Retrieve config with data attribute
+  const attr = el.getAttribute("data-animation");
 
-  // Find classes based on specified class name on config object.
+  // Find configuration for specific attribute
+  const config = animationConfig[attr];
+  if (!config) return;
+
+  // Apply parent styles if present
+  if (config.parent_styles) applyStyles(el, config.parent_styles);
+
+  // Find child elements based on child_class
   el.querySelectorAll(`.${config.child_class}`).forEach((node, idx) => {
-    // Calculate stagger and apply to child node.
+    // If stagger, apply transition delay
     if (config?.stagger) {
       node.style.transitionDelay = `${idx * config.stagger}ms`;
     }
 
-    // If child styles are specified, apply them.
-    if (Object.hasOwn(config?.childStyles, key)) {
-      applyStyles(node, config.childStyles[key]);
+    // If child_styles, apply them to child node
+    if (config?.child_styles) {
+      applyStyles(node, config.child_styles);
     }
   });
 };
@@ -133,11 +131,10 @@ const entryDirection = (entry, state) => {
 
 const initIntersectionObserver = () => {
   document.querySelectorAll('[data-animated="true"]')?.forEach((el) => {
-    applyDataAnimation(el, "before");
-
+    // Clause checks if element is already above current view
     const r = el.getBoundingClientRect();
     if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
-      applyDataAnimation(el, "after");
+      applyDataAnimation(el);
     }
 
     // Form closure over object to hold previous state data
@@ -150,9 +147,9 @@ const initIntersectionObserver = () => {
     const fn = (entries) => {
       const dir = entryDirection(entries[0], prev);
       if (dir === directions.UP_ENTER || dir === directions.DOWN_ENTER) {
-        applyDataAnimation(el, "after");
+        applyDataAnimation(el);
       } else {
-        applyDataAnimation(el, "before");
+        removeDataAnimation(el);
       }
     };
 

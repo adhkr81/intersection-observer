@@ -10,9 +10,6 @@
 .content {
   border-radius: 4px;
   height: 300px;
-  padding: 30px;
-
-  transition: 2s;
 
   display: flex;
   flex-direction: row;
