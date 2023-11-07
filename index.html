@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./style.css" />
+
+    <!-- <script type="module" src="./test.config.mjs" defer></script> -->
     <script src="./index.js" type="module" defer></script>
     <title>Document</title>
   </head>
@@ -12,8 +14,9 @@
       <div class="spacing"></div>
       <div
         class="content"
-        data-animated="true"
-        data-animation="multiple-staggered-fadein"
+        data-animation="fade-in-up"
+        data-stagger="100"
+        data-root-margin="-150px"
       >
         <div class="fade-in-up white rectangle"></div>
         <div class="fade-in-up white rectangle"></div>
@@ -22,8 +25,9 @@
       </div>
       <div
         class="content"
-        data-animated="true"
-        data-animation="multiple-staggered-fadein"
+        data-animation="fade-in-up"
+        data-stagger="250"
+        data-root-margin="-150px"
       >
         <div class="fade-in-up white rectangle"></div>
         <div class="fade-in-up white rectangle"></div>
@@ -32,8 +36,9 @@
       </div>
       <div
         class="content"
-        data-animated="true"
-        data-animation="multiple-staggered-fadein"
+        data-animation="fade-in-up"
+        data-stagger="500"
+        data-root-margin="-150px"
       >
         <div class="fade-in-up white rectangle"></div>
         <div class="fade-in-up white rectangle"></div>
