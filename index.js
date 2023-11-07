@@ -4,67 +4,14 @@
  * API Currently enjoys support on all major browsers expect for IE:
  * https://www.lambdatest.com/web-technologies/intersectionobserver
  *
- * This project provides an API for setting before and after styles on both
- * parent and child classes recognized by the data-animated attribute.
- *
- * In order to use it, set the data-animated attribute to true and the
- * data-animation attribute to the key of your config object. In the
- * config object, specify if there are child classes to be animated
- * with the childClass key, and the styles that will be applied in the
- * parentStyles and childStyles keys, both containing a before and after.
  *
  */
 
 const animationConfig = {
   "multiple-staggered-fadein": {
-    child_class: "animated-child",
+    child_class: "fade-in-up",
+    class_to_add: "animated",
     stagger: 100,
-    parentStyles: {
-      before: `
-        boxSizing:border-box;
-        padding: 35px;
-        transition: 2s;
-      `,
-      after: `
-        backgroundColor:#7d7d7d;
-        padding:50px;
-      `,
-    },
-    childStyles: {
-      before: `
-        opacity: 0;
-        transition: 2s;
-      `,
-      after: `
-        opacity: 1;
-      `,
-    },
-  },
-  "multiple-staggered-pop": {
-    child_class: "animated-child",
-    stagger: 500,
-    parentStyles: {
-      before: `
-        boxSizing:border-box;
-        padding:50px;
-        transition:2s;
-      `,
-      after: `
-        backgroundColor:#7d7d7d;
-        padding:35px;
-      `,
-    },
-    childStyles: {
-      before: `
-        backgroundColor: black;
-        boxShadow: none;
-        transition: 2s;
-      `,
-      after: `
-        backgroundColor:#606c38;
-        boxShadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
-      `,
-    },
   },
 };
 
@@ -79,36 +26,30 @@ const directions = {
 // Browser supports Intersection Observer
 const INTERSECTION_OBSERVER_SUPPORT = "IntersectionObserver" in window;
 
-const applyStyles = (el, styles) => {
-  // Based on styles string, applies parsed styles to element.
-  styles.split(";").forEach((style) => {
-    if (style === "") return;
-    const [k, v] = style.split(":");
-    el.style[k?.trim()] = v?.trim();
-  });
-};
-
-const applyDataAnimation = (el, key) => {
+const toggleDataAnimation = (el, action = "apply") => {
   // Find the data-animation attribute key to match with config object.
   const attr = el.getAttribute("data-animation");
   const config = animationConfig[attr];
   if (!config) return;
 
-  // If parent styles are specified, apply them.
-  if (Object.hasOwn(config?.parentStyles, key)) {
-    applyStyles(el, config.parentStyles[key]);
-  }
-
   // Find classes based on specified class name on config object.
   el.querySelectorAll(`.${config.child_class}`).forEach((node, idx) => {
     // Calculate stagger and apply to child node.
-    if (config?.stagger) {
+    if (Object.hasOwn(config, "stagger")) {
       node.style.transitionDelay = `${idx * config.stagger}ms`;
     }
 
-    // If child styles are specified, apply them.
-    if (Object.hasOwn(config?.childStyles, key)) {
-      applyStyles(node, config.childStyles[key]);
+    // If child class is specified, apply it.
+    if (Object.hasOwn(config, "class_to_add")) {
+      if (action === "apply") {
+        node?.classList.add(config.class_to_add);
+      } else if (action === "remove") {
+        node?.classList.remove(config.class_to_add);
+      } else {
+        throw new Error(
+          "toggleDataAnimation should be called with either ( 'apply' | 'remove' )"
+        );
+      }
     }
   });
 };
@@ -133,14 +74,12 @@ const entryDirection = (entry, state) => {
 
 const initIntersectionObserver = () => {
   document.querySelectorAll('[data-animated="true"]')?.forEach((el) => {
-    // On init, sets all elements to before state
-
     // On init, sets all elements above view to after state, and below to before
     const r = el.getBoundingClientRect();
     if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
-      applyDataAnimation(el, "after");
+      toggleDataAnimation(el);
     } else {
-      applyDataAnimation(el, "before");
+      toggleDataAnimation(el, "remove");
     }
 
     // Form closure over object to hold previous state data
@@ -152,17 +91,17 @@ const initIntersectionObserver = () => {
     // Intersection observer API callback
     const fn = (entries) => {
       const dir = entryDirection(entries[0], prev);
-      console.log("DIR", dir);
       if (dir === directions.UP_ENTER) {
-        applyDataAnimation(el, "after");
+        toggleDataAnimation(el);
       } else if (dir === directions.UP_LEAVE) {
-        applyDataAnimation(el, "before");
+        toggleDataAnimation(el, "remove");
       }
     };
 
     // Create intersection observer
     new IntersectionObserver(fn, {
       threshold: 0,
+      rootMargin: "-250px",
     }).observe(el);
   });
 };

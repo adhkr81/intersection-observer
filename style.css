@@ -10,20 +10,14 @@
 .content {
   border-radius: 4px;
   height: 300px;
+  background-color: gray;
+  padding: 30px;
+  box-sizing: border-box;
+  margin-bottom: 15px;
 
   display: flex;
   flex-direction: row;
   gap: 15px;
-}
-
-.hidden-animated {
-  opacity: 0;
-  transition: 2s;
-}
-
-.pop-animated {
-  background: #283618;
-  transition: 2s;
 }
 
 .white {
@@ -33,4 +27,15 @@
 .rectangle {
   border-radius: 4px;
   width: 100%;
+}
+
+.fade-in-up {
+  transform: translateY(20px);
+  opacity: 0;
+  transition: 0.3s ease;
+}
+
+.fade-in-up.animated {
+  transform: translateY(0px);
+  opacity: 1;
 }
