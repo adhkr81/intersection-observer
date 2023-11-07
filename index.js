@@ -133,11 +133,14 @@ const entryDirection = (entry, state) => {
 
 const initIntersectionObserver = () => {
   document.querySelectorAll('[data-animated="true"]')?.forEach((el) => {
-    applyDataAnimation(el, "before");
+    // On init, sets all elements to before state
 
+    // On init, sets all elements above view to after state, and below to before
     const r = el.getBoundingClientRect();
     if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
       applyDataAnimation(el, "after");
+    } else {
+      applyDataAnimation(el, "before");
     }
 
     // Form closure over object to hold previous state data
@@ -149,15 +152,18 @@ const initIntersectionObserver = () => {
     // Intersection observer API callback
     const fn = (entries) => {
       const dir = entryDirection(entries[0], prev);
-      if (dir === directions.UP_ENTER || dir === directions.DOWN_ENTER) {
+      console.log("DIR", dir);
+      if (dir === directions.UP_ENTER) {
         applyDataAnimation(el, "after");
-      } else {
+      } else if (dir === directions.UP_LEAVE) {
         applyDataAnimation(el, "before");
       }
     };
 
     // Create intersection observer
-    new IntersectionObserver(fn, { threshold: 0 }).observe(el);
+    new IntersectionObserver(fn, {
+      threshold: 0,
+    }).observe(el);
   });
 };
 
