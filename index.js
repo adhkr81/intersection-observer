@@ -4,7 +4,10 @@
  * API Currently enjoys support on all major browsers expect for IE:
  * https://www.lambdatest.com/web-technologies/intersectionobserver
  *
- *
+ * Intersection Observer API injects classes into children that contain
+ * the specified class, the children to be animated can be flagged
+ * with the 'child_class' configuration key while the actual class
+ * that will be injected can be specified with the 'class_to_add' key.
  */
 
 const animationConfig = {
@@ -114,7 +117,7 @@ const initIntersectionObserverFallback = () => {
       // Clause checks if element is already above current view
       const r = el.getBoundingClientRect();
       if ((r.top >= 0 && r.bottom <= window.innerHeight) || r.top < 0) {
-        setDataAnimated(el, true);
+        toggleDataAnimation(el);
         return;
       }
       // Check element if on-screen
@@ -125,7 +128,7 @@ const initIntersectionObserverFallback = () => {
         r.right <= window.innerWidth
       ) {
         // Change data animated to true
-        setDataAnimated(el, true);
+        toggleDataAnimation(el);
       }
     });
   });
