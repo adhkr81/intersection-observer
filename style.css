@@ -19,18 +19,21 @@
   gap: 15px;
 }
 
-[data-animated="true"][data-animation="fade-in"] {
-  background-color: #7d7d7d;
-}
-
-[data-animated="false"][data-animation="fade-in"] {
-  background-color: white;
-}
-
-.animated-child {
-  background-color: white;
-  border-radius: 4px;
-  width: 100%;
+.hidden-animated {
   opacity: 0;
   transition: 2s;
+}
+
+.pop-animated {
+  background: #283618;
+  transition: 2s;
+}
+
+.white {
+  background-color: white;
+}
+
+.rectangle {
+  border-radius: 4px;
+  width: 100%;
 }

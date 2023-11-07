@@ -1,7 +1,0 @@
-{
-  "multiple-staggered-fadein": {
-    "child_class": "animated-child",
-    "opacity": 1,
-    "stagger": 300
-  }
-}
