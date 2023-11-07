@@ -1,5 +1,5 @@
 /**
- * Intersection Obveserver API Test
+ * Intersection Obveserver Animation API
  *
  * API Currently enjoys support on all major browsers expect for IE:
  * https://www.lambdatest.com/web-technologies/intersectionobserver
@@ -12,7 +12,7 @@
  * config object, specify if there are child classes to be animated
  * with the childClass key, and the styles that will be applied in the
  * parentStyles and childStyles keys, both containing a before and after.
- * 
+ *
  */
 
 const animationConfig = {
