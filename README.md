@@ -1,4 +1,4 @@
-##### Intersection Observer Animation API
+### Intersection Observer Animation API
 
 Intersection Observer API Currently enjoys support on all major browsers expect for IE:
 https://www.lambdatest.com/web-technologies/intersectionobserver
@@ -15,6 +15,8 @@ string with the styles.
 
 Animations are triggered whenever element enters the screen from the bottom or
 from the top, and are not retriggered when the element exits screen.
+
+---
 
 ##### Usage
 
@@ -62,3 +64,39 @@ and the animation class on the children:
   <div class="animated-child"></div>
 </div>
 ```
+---
+
+##### Test Cases
+
+- Element entering screen triggers animations
+
+Animations declare in the `after` block of both `parentStyles` and `childStyles`
+should be triggered when the element enters the screen from below (scrolling down) or
+from above (scrolling up).
+
+- Element exiting screen should return to before state
+
+Once the object exits the screen from above or below, he `before` state should be triggered,
+which makes it possible to trigger the `after` state if the object re-enters the screen.
+
+- Element should be in `before` state by default
+
+The styles declared in the respective `before` blocks should be set by default, these will
+be apply at initialization time when the element becomes *observed*.
+
+- Animation states are only applied to `[data-animated=true]` elements
+
+Only elements with this specific data attribute will become observed and have their animation
+states applied.
+
+- Elements with `[data-animated=true]` but without a valid `data-animation` should be ignored
+
+If `data-animated` is set to `true` but there is no valid configuration for the `data-animation`
+attribute, no intersection observer should be created for that element.
+
+- Animation states should only be applied to children with corresponding `childClass`
+
+Animation styles should not be applied to children that do not have the class that
+corresponds to the `childClass` key in the animation config.
+
+
